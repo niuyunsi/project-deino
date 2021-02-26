@@ -1,7 +1,7 @@
 import { v4 } from "https://deno.land/std/uuid/mod.ts";
 import { Product } from "../types/index.ts";
 
-const products: Product[] = [
+let products: Product[] = [
   {
     id: "1",
     name: "Product One",
@@ -54,11 +54,31 @@ const getProduct = ({
   }
 };
 
-const addProduct = ({ response }: { response: any }) => {
-  response.body = {
-    success: true,
-    data: products,
-  };
+const addProduct = async ({
+  request,
+  response,
+}: {
+  request: any;
+  response: any;
+}) => {
+  if (!request.hasBody) {
+    response.status = 400;
+    response.body = {
+      sucess: false,
+      msg: "No Data",
+    };
+  } else {
+    const { value } = await request.body({ type: "json" });
+    console.log("value", value);
+    const product: Product = await value;
+    product.id = v4.generate();
+    products.push(product);
+    response.status = 201;
+    response.body = {
+      success: true,
+      data: product,
+    };
+  }
 };
 
 const updateProduct = ({ response }: { response: any }) => {
@@ -68,11 +88,31 @@ const updateProduct = ({ response }: { response: any }) => {
   };
 };
 
-const deleteProduct = ({ response }: { response: any }) => {
-  response.body = {
-    success: true,
-    data: products,
-  };
+const deleteProduct = ({
+  params,
+  response,
+}: {
+  params: { id: string };
+  response: any;
+}) => {
+  const filteredProducts: Product[] = products.filter(
+    (product) => product.id !== params.id
+  );
+  if (filteredProducts.length === products.length) {
+    response.status = 404;
+    response.body = {
+      success: false,
+      msg: "Not found",
+    };
+  } else {
+    products.splice(0, products.length);
+    products.push(...filteredProducts);
+    response.status = 200;
+    response.body = {
+      success: true,
+      msg: `Product with id ${params.id} has been deleted`,
+    };
+  }
 };
 
 export { getProducts, getProduct, addProduct, updateProduct, deleteProduct };
