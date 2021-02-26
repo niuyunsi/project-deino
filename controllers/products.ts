@@ -71,7 +71,6 @@ const addProduct = async ({
     };
   } else {
     const { value } = await request.body({ type: "json" });
-    console.log("value", value);
     const product: Product = await value;
     product.id = v4.generate();
     products.push(product);
@@ -83,11 +82,47 @@ const addProduct = async ({
   }
 };
 
-const updateProduct = ({ response }: { response: Response }) => {
-  response.body = {
-    success: true,
-    data: products,
-  };
+const updateProduct = async ({
+  params,
+  request,
+  response,
+}: {
+  params: { id: string };
+  request: Request;
+  response: Response;
+}) => {
+  const requestedProduct: Product | undefined = products.find(
+    (product) => product.id === params.id
+  );
+
+  if (requestedProduct) {
+    const { value } = await request.body({ type: "json" });
+    const product: Product = await value;
+
+    const updatedProducts: Product[] = products.map((p) => {
+      if (p.id === params.id) {
+        return {
+          ...p,
+          ...product,
+        };
+      } else {
+        return p;
+      }
+    });
+    products.splice(0, products.length);
+    products.push(...updatedProducts);
+    response.status = 200;
+    response.body = {
+      success: true,
+      msg: `Product id ${params.id} updated`,
+    };
+  } else {
+    response.status = 404;
+    response.body = {
+      success: false,
+      data: "Not Found",
+    };
+  }
 };
 
 const deleteProduct = ({
@@ -104,7 +139,7 @@ const deleteProduct = ({
     response.status = 404;
     response.body = {
       success: false,
-      msg: "Not found",
+      msg: "Not Found",
     };
   } else {
     products.splice(0, products.length);
