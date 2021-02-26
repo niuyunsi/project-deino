@@ -1,7 +1,9 @@
+import { Request, Response } from "https://deno.land/x/oak/mod.ts";
 import { v4 } from "https://deno.land/std/uuid/mod.ts";
+
 import { Product } from "../types/index.ts";
 
-let products: Product[] = [
+const products: Product[] = [
   {
     id: "1",
     name: "Product One",
@@ -22,7 +24,7 @@ let products: Product[] = [
   },
 ];
 
-const getProducts = ({ response }: { response: any }) => {
+const getProducts = ({ response }: { response: Response }) => {
   response.body = {
     success: true,
     data: products,
@@ -34,7 +36,7 @@ const getProduct = ({
   response,
 }: {
   params: { id: string };
-  response: any;
+  response: Response;
 }) => {
   const selectedProduct: Product | undefined = products.find(
     (product) => product.id === params.id
@@ -58,8 +60,8 @@ const addProduct = async ({
   request,
   response,
 }: {
-  request: any;
-  response: any;
+  request: Request;
+  response: Response;
 }) => {
   if (!request.hasBody) {
     response.status = 400;
@@ -81,7 +83,7 @@ const addProduct = async ({
   }
 };
 
-const updateProduct = ({ response }: { response: any }) => {
+const updateProduct = ({ response }: { response: Response }) => {
   response.body = {
     success: true,
     data: products,
@@ -93,7 +95,7 @@ const deleteProduct = ({
   response,
 }: {
   params: { id: string };
-  response: any;
+  response: Response;
 }) => {
   const filteredProducts: Product[] = products.filter(
     (product) => product.id !== params.id
