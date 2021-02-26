@@ -1,7 +1,7 @@
 import { v4 } from "https://deno.land/std/uuid/mod.ts";
 import { Product } from "../types/index.ts";
 
-let products: Product[] = [
+const products: Product[] = [
   {
     id: "1",
     name: "Product One",
